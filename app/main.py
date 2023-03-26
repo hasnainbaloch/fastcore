@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Response, status
+from fastapi import FastAPI, Response, status, HTTPException
 from pydantic import BaseModel
 
 app = FastAPI()
@@ -37,9 +37,15 @@ def find_or_delete_post_by_id(post_id: int, action: str):
             deletePost(post)
             return {"message": "Post deleted successfully."}
         else:
-            return {"message": "Invalid action."}
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Action {action} is not supported.",
+            )
     else:
-        return {"message": "Post not found."}
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Post with id {post_id} does not exist.",
+        )
 
 
 @app.get("/posts")
@@ -55,12 +61,12 @@ async def add_post(post: Post):
 
 
 @app.get("/posts/{post_id}")
-async def get_post(post_id: int, response: Response):
+async def get_post(post_id: int):
     post = find_or_delete_post_by_id(post_id, "find")
     return post
 
 
 @app.delete("/posts/{post_id}")
-async def delete_post(post_id: int, response: Response):
+async def delete_post(post_id: int):
     post = find_or_delete_post_by_id(post_id, "delete")
     return post
