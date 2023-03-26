@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Response, status
 from pydantic import BaseModel
 
 app = FastAPI()
@@ -25,12 +25,21 @@ def deletePost(post):
     my_posts.remove(post)
 
 
-def Post_by_id(post_id: int):
-    for post in my_posts:
-        if post["id"] == post_id:
+def find_or_delete_post_by_id(post_id: int, action: str):
+    post_dict = {post["id"]: post for post in my_posts}
+
+    if post_id in post_dict:
+        post = post_dict[post_id]
+
+        if action == "find":
+            return post
+        elif action == "delete":
             deletePost(post)
+            return {"message": "Post deleted successfully."}
         else:
-            return False
+            return {"message": "Invalid action."}
+    else:
+        return {"message": "Post not found."}
 
 
 @app.get("/posts")
@@ -46,13 +55,12 @@ async def add_post(post: Post):
 
 
 @app.get("/posts/{post_id}")
-async def get_post(post_id: int):
-    return my_posts[post_id - 1]
+async def get_post(post_id: int, response: Response):
+    post = find_or_delete_post_by_id(post_id, "find")
+    return post
 
 
 @app.delete("/posts/{post_id}")
-async def delete_post(post_id: int):
-    if Post_by_id(post_id):
-        return {"message": "Post deleted successfully"}
-    else:
-        return {"error": "Post not found"}
+async def delete_post(post_id: int, response: Response):
+    post = find_or_delete_post_by_id(post_id, "delete")
+    return post
