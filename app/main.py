@@ -39,12 +39,12 @@ def find_or_delete_post_by_id(post_id: int, action: str):
         else:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Action {action} is not supported!!!",
+                detail=f"Action {action} is not supported.",
             )
     else:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Post with id {post_id} does not exist!!!!",
+            detail=f"Post with id {post_id} does not exist.",
         )
 
 
